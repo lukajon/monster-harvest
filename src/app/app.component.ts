@@ -8,10 +8,10 @@ import {DragDropModule} from '@angular/cdk/drag-drop';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [
-      RouterOutlet,
-      MonsterHarvestComponent,
-      CommonModule],
+    imports: [
+        RouterOutlet,
+        MonsterHarvestComponent,
+        CommonModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })

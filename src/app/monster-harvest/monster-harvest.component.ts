@@ -13,8 +13,8 @@ import {MatTable, MatTableModule} from '@angular/material/table';
 import {MatIcon} from '@angular/material/icon';
 
 @Component({
-  selector: 'app-monster-harvest',
-  standalone: true,
+    selector: 'app-monster-harvest',
+    standalone: true,
     imports: [
         CommonModule,
         CdkDropList,
@@ -24,8 +24,8 @@ import {MatIcon} from '@angular/material/icon';
         DragDropModule,
         MatIcon
     ],
-  templateUrl: './monster-harvest.component.html',
-  styleUrl: './monster-harvest.component.scss'
+    templateUrl: './monster-harvest.component.html',
+    styleUrl: './monster-harvest.component.scss'
 })
 export class MonsterHarvestComponent {
     public dmMode: boolean = false;
