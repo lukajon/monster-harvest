@@ -1,0 +1,80 @@
+<div>
+    <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" role="switch" id="switchDMMode" (change)="toggleDMMode()">
+        <label class="form-check-label" for="switchDMMode">DM Mode</label>
+    </div>
+    <ng-container *ngIf="dmMode">
+        <select id="monsterTypeSelect" class="form-select" (change)="onMonsterTypeChange($event)">
+            <option value="" disabled selected hidden>Creature Type</option>
+            <option *ngFor="let type of monsterTypes" [value]="type">{{ type }}</option>
+        </select>
+        <select id="monsterSizeSelect" class="form-select" (change)="onMonsterSizeChange($event)">
+            <option value="" disabled selected hidden>Creature Size</option>
+            <option *ngFor="let size of monsterSizes" [value]="size">{{ size }}</option>
+        </select>
+        <select id="monsterCRSelect" class="form-select" (change)="onMonsterCRChange($event)">
+            <option value="" disabled selected hidden>CR</option>
+            <option *ngFor="let cr of monsterCR" [value]="cr">{{ cr }}</option>
+        </select>
+    </ng-container>
+</div>
+
+<div *ngIf="sizeMessage" class="mt-2">{{ sizeMessage }}</div>
+<div *ngIf="crMessage" class="mt-2">{{ crMessage }}</div>
+<div>
+    <h4>Harvest DC: {{ currentDC }}</h4>
+</div>
+
+<div cdkDropListGroup class="flex flex-wrap gap-4">
+    <div class="flex-1 min-w-72">
+        <h6>Harvest List</h6>
+        <mat-table #toHarvestTable [dataSource]="toHarvest" cdkDropList (cdkDropListDropped)="drop($event)"
+                   [cdkDropListData]="toHarvest">
+
+            <ng-container matColumnDef="dc">
+                <mat-header-cell *matHeaderCellDef> DC </mat-header-cell>
+                <mat-cell *matCellDef="let element"> {{element.dc}} </mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="type">
+                <mat-header-cell *matHeaderCellDef> Type </mat-header-cell>
+                <mat-cell *matCellDef="let element"> {{element.type}} </mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="creature component">
+                <mat-header-cell *matHeaderCellDef> Component </mat-header-cell>
+                <mat-cell *matCellDef="let element"> {{element.component}} </mat-cell>
+            </ng-container>
+
+            <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+            <mat-row *matRowDef="let row; columns: displayedColumns;" cdkDrag [cdkDragData]="row">
+            </mat-row>
+        </mat-table>
+    </div>
+
+    <div class="flex-1 min-w-72">
+        <h6>Available Components</h6>
+        <mat-table #notToHarvestTable [dataSource]="notToHarvest" cdkDropList (cdkDropListDropped)="drop($event)"
+                   [cdkDropListData]="notToHarvest">
+
+            <ng-container matColumnDef="dc">
+                <mat-header-cell *matHeaderCellDef> DC </mat-header-cell>
+                <mat-cell *matCellDef="let element"> {{element.dc}} </mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="type">
+                <mat-header-cell *matHeaderCellDef> Type </mat-header-cell>
+                <mat-cell *matCellDef="let element"> {{element.type}} </mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="creature component">
+                <mat-header-cell *matHeaderCellDef> Component </mat-header-cell>
+                <mat-cell *matCellDef="let element"> {{element.component}} </mat-cell>
+            </ng-container>
+
+            <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+            <mat-row *matRowDef="let row; columns: displayedColumns;" cdkDrag [cdkDragData]="row">
+            </mat-row>
+        </mat-table>
+    </div>
+</div>
