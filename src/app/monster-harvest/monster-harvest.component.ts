@@ -19,8 +19,8 @@ const METADATA_KEY = "com.lukajon.monsterHarvest/harvestData";
 interface HarvestMetadata {
     toHarvest: any[];
     notToHarvest: any[];
-    sizeMessage: string;
-    crMessage: string;
+    selectedSize: string;
+    selectedCR: string;
     currentDC: number;
 }
 
@@ -49,6 +49,8 @@ export class MonsterHarvestComponent implements OnInit, OnDestroy {
     public crMessage: string = '';
     public selectedEssence: MonsterComponent | null = null;
     public selectedType: string = '';
+    public selectedSize = '';
+    public selectedCR = '';
     public toHarvest: MonsterComponent[] = [];
     public notToHarvest: MonsterComponent[] = [];
     public currentDC: number = 0;
@@ -83,15 +85,7 @@ export class MonsterHarvestComponent implements OnInit, OnDestroy {
 
             if (data) {
                 // Update local lists with the shared data
-                this.toHarvest = data.toHarvest || [];
-                this.notToHarvest = data.notToHarvest || [];
-                this.sizeMessage = data.sizeMessage;
-                this.crMessage = data.crMessage;
-                this.currentDC = data.currentDC;
-                console.log("Harvest data loaded successfully.");
-                this.toHarvestTable?.renderRows();
-                this.notToHarvestTable?.renderRows();
-                this.cdr.detectChanges();
+                this.updateLocalLists(data);
             } else {
                 // If no data is present, initialize the lists as empty
                 this.resetHarvestData();
@@ -99,15 +93,34 @@ export class MonsterHarvestComponent implements OnInit, OnDestroy {
         });
     }
 
-    // Save `toHarvest` and `notToHarvest` lists to Owlbear metadata
+    private updateLocalLists(data: HarvestMetadata) {
+        this.toHarvest = data.toHarvest || [];
+        this.notToHarvest = data.notToHarvest || [];
+        this.selectedSize = data.selectedSize;
+        console.log(this.selectedSize);
+        this.setSizeMessage(this.selectedSize);
+        console.log(this.sizeMessage);
+        this.selectedCR = data.selectedCR;
+        this.setCRMessage(this.selectedCR);
+        this.setSelectedEssence(this.selectedCR);
+        this.currentDC = data.currentDC;
+
+        console.log("Harvest data loaded successfully.");
+
+        this.toHarvestTable?.renderRows();
+        this.notToHarvestTable?.renderRows();
+        this.cdr.detectChanges();
+    }
+
+// Save `toHarvest` and `notToHarvest` lists to Owlbear metadata
     private async saveHarvestData(): Promise<void> {
         try {
             await OBR.room.setMetadata({
                 [METADATA_KEY]: {
                     toHarvest: this.toHarvest,
                     notToHarvest: this.notToHarvest,
-                    sizeMessage: this.sizeMessage,
-                    crMessage: this.crMessage,
+                    selectedSize: this.selectedSize,
+                    selectedCR: this.selectedCR,
                     currentDC: this.currentDC
                 }
             });
@@ -125,11 +138,7 @@ export class MonsterHarvestComponent implements OnInit, OnDestroy {
 
             if (data) {
                 // Populate `toHarvest` and `notToHarvest` if data exists
-                this.toHarvest = data.toHarvest || [];
-                this.notToHarvest = data.notToHarvest || [];
-                this.sizeMessage = data.sizeMessage;
-                this.crMessage = data.crMessage;
-                this.currentDC = data.currentDC;
+                this.updateLocalLists(data);
                 console.log("Harvest data loaded successfully.");
 
                 // Trigger change detection to update the view
@@ -146,8 +155,8 @@ export class MonsterHarvestComponent implements OnInit, OnDestroy {
     private resetHarvestData(): void {
         this.toHarvest = [];
         this.notToHarvest = [];
-        this.sizeMessage = '';
-        this.crMessage = '';
+        this.selectedSize = '';
+        this.selectedCR = '';
         this.currentDC = 0;
     }
 
@@ -171,21 +180,22 @@ export class MonsterHarvestComponent implements OnInit, OnDestroy {
     }
 
     public async onMonsterSizeChange(event: Event): Promise<void> {
-        const selectedSize = (event.target as HTMLSelectElement).value;
-        this.sizeMessage = this.sizeMessages[selectedSize] || '';
+        this.selectedSize = (event.target as HTMLSelectElement).value;
+        this.setSizeMessage(this.selectedSize);
 
         await this.saveHarvestData();
     }
 
     public async onMonsterCRChange(event: Event): Promise<void> {
-        const selectedCR = (event.target as HTMLSelectElement).value;
-        this.crMessage = this.crEssences[selectedCR]?.message || '';
+        this.selectedCR = (event.target as HTMLSelectElement).value;
+        this.setCRMessage(this.selectedCR);
 
         if (this.selectedEssence) {
             this.removeEssenceFromAvailable();
         }
 
-        const essence = this.crEssences[selectedCR]?.essence;
+        this.setSelectedEssence(this.selectedCR);
+        const essence = this.selectedEssence;
         if (essence) {
             this.addEssenceToAvailable(essence);
         }
@@ -227,6 +237,40 @@ export class MonsterHarvestComponent implements OnInit, OnDestroy {
         this.cdr.detectChanges();
     }
 
+    public moveToHarvest(component: MonsterComponent): void {
+        component.active = false;
+
+        const index = this.notToHarvest.findIndex(comp => comp.id === component.id);
+        if (index !== -1) {
+            this.notToHarvest.splice(index, 1);
+        }
+
+        this.toHarvest.push(component);
+
+        this.toHarvestTable?.renderRows();
+        this.notToHarvestTable?.renderRows();
+
+        this.saveHarvestData();
+    }
+
+    public moveToNotToHarvest(component: MonsterComponent): void {
+        component.active = true;
+
+        const index = this.toHarvest.findIndex(comp => comp.id === component.id);
+        if (index !== -1) {
+            this.toHarvest.splice(index, 1);
+        }
+
+        this.notToHarvest.push(component);
+
+        this.sortComponents();
+
+        this.toHarvestTable?.renderRows();
+        this.notToHarvestTable?.renderRows();
+
+        this.saveHarvestData();
+    }
+
     private setComponentActiveState(componentId: string): void {
         // Find the component in notToHarvest with the matching ID and set its active state
         const component = this.notToHarvest.find(comp => comp.id === componentId && !comp.active);
@@ -239,16 +283,19 @@ export class MonsterHarvestComponent implements OnInit, OnDestroy {
         const clonedComponent = {...component};
         clonedComponent.active = true;
         this.notToHarvest.push(clonedComponent);
+        this.sortComponents();
 
+        this.notToHarvestTable?.renderRows();
+        await this.saveHarvestData();
+    }
+
+    private sortComponents() {
         this.notToHarvest.sort((a, b) => {
             if (a.dc !== b.dc) {
                 return a.dc - b.dc;
             }
             return a.component.localeCompare(b.component);
         });
-
-        this.notToHarvestTable?.renderRows();
-        await this.saveHarvestData();
     }
 
     public async toggleActive(component: MonsterComponent): Promise<void> {
@@ -305,5 +352,17 @@ export class MonsterHarvestComponent implements OnInit, OnDestroy {
 
     private removeEssenceFromAvailable(): void {
         this.notToHarvest = this.notToHarvest.filter(component => component.type !== 'essence');
+    }
+
+    private setSizeMessage(selectedSize: string) {
+        this.sizeMessage = this.sizeMessages[selectedSize] || '';
+    }
+
+    private setCRMessage(selectedCR: string) {
+        this.crMessage = this.crEssences[selectedCR]?.message || '';
+    }
+
+    private setSelectedEssence(selectedCR: string) {
+        this.selectedEssence = this.crEssences[selectedCR]?.essence;
     }
 }
