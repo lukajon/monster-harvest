@@ -246,6 +246,7 @@ export class MonsterHarvestComponent implements OnInit, OnDestroy {
         }
 
         this.toHarvest.push(component);
+        this.calculateDC();
 
         this.toHarvestTable?.renderRows();
         this.notToHarvestTable?.renderRows();
@@ -262,6 +263,7 @@ export class MonsterHarvestComponent implements OnInit, OnDestroy {
         }
 
         this.notToHarvest.push(component);
+        this.calculateDC();
 
         this.sortComponents();
 
@@ -329,22 +331,31 @@ export class MonsterHarvestComponent implements OnInit, OnDestroy {
     }
 
     private sizeMessages: { [key: string]: string } = {
-        Tiny: 'Harvesting takes 5 minutes.',
-        Small: 'Harvesting takes 10 minutes.',
-        Medium: 'Harvesting takes 15 minutes.',
-        Large: 'Harvesting takes 30 minutes.',
-        Huge: 'Harvesting takes 2 hours.',
-        Gargantuan: 'Harvesting takes 12 hours.',
+        Tiny: '5 min',
+        Small: '10 min',
+        Medium: '15 min',
+        Large: '30 min',
+        Huge: '2 hours',
+        Gargantuan: '12 hours',
     };
 
     private crEssences: { [key: string]: { message: string, essence: MonsterComponent | null } } = {
-        'less than 3': { message: 'You cannot extract an essence.', essence: null },
-        '3 to 6': { message: 'Frail essence can be extracted. Used for uncommon magic items.', essence: { dc: 25, type: 'essence', component: 'Frail Essence', id: 'essence-3-6', active: true }},
-        '7 to 11': { message: 'Robust essence can be extracted. Used for rare magic items.', essence: { dc: 30, type: 'essence', component: 'Robust Essence', id: 'essence-7-11', active: true }},
-        '12 to 17': { message: 'Potent essence can be extracted. Used for very rare magic items.', essence: { dc: 35, type: 'essence', component: 'Potent Essence', id: 'essence-12-17', active: true }},
-        '18 to 24': { message: 'Mythic essence can be extracted. Used for legendary magic items.', essence: { dc: 40, type: 'essence', component: 'Mythic Essence', id: 'essence-18-24', active: true }},
-        '25+': { message: 'Deific essence can be extracted. Used for artifacts.', essence: { dc: 50, type: 'essence', component: 'Deific Essence', id: 'essence-25+', active: true }},
+        'less than 3': { message: 'None', essence: null },
+        '3 to 6': { message: 'Frail (uncommon)', essence: { dc: 25, type: 'Essence', component: 'Frail Essence', id: 'essence-3-6', active: true }},
+        '7 to 11': { message: 'Robust (rare)', essence: { dc: 30, type: 'Essence', component: 'Robust Essence', id: 'essence-7-11', active: true }},
+        '12 to 17': { message: 'Potent (very rare)', essence: { dc: 35, type: 'Essence', component: 'Potent Essence', id: 'essence-12-17', active: true }},
+        '18 to 24': { message: 'Mythic (legendary)', essence: { dc: 40, type: 'Essence', component: 'Mythic Essence', id: 'essence-18-24', active: true }},
+        '25+': { message: 'Deific (artifacts)', essence: { dc: 50, type: 'Essence', component: 'Deific Essence', id: 'essence-25+', active: true }},
     };
+
+    // private crEssences: { [key: string]: { name: string, message: string, essence: MonsterComponent | null } } = {
+    //     'less than 3': { name: 'No essence', message: 'You cannot extract an essence.', essence: null },
+    //     '3 to 6': { name: 'Frail essence (uncommon)', message: 'Frail essence can be extracted. Used for uncommon magic items.', essence: { dc: 25, type: 'essence', component: 'Frail Essence', id: 'essence-3-6', active: true }},
+    //     '7 to 11': { name: 'Robust essence (rare)', message: 'Robust essence can be extracted. Used for rare magic items.', essence: { dc: 30, type: 'essence', component: 'Robust Essence', id: 'essence-7-11', active: true }},
+    //     '12 to 17': { name: 'Potent essence (very rare)', message: 'Potent essence can be extracted. Used for very rare magic items.', essence: { dc: 35, type: 'essence', component: 'Potent Essence', id: 'essence-12-17', active: true }},
+    //     '18 to 24': { name: 'Mythic essence (legendary)', message: 'Mythic essence can be extracted. Used for legendary magic items.', essence: { dc: 40, type: 'essence', component: 'Mythic Essence', id: 'essence-18-24', active: true }},
+    //     '25+': { name: 'Deific essence (artifacts)', message: 'Deific essence can be extracted. Used for artifacts.', essence: { dc: 50, type: 'essence', component: 'Deific Essence', id: 'essence-25+', active: true }},
+    // };
 
     private addEssenceToAvailable(essence: MonsterComponent): void {
         this.notToHarvest.push(essence);

@@ -1,0 +1,66 @@
+.hexagon {
+    position: relative;
+    width: 80px; /* Smaller width */
+    height: 45px; /* Smaller height */
+    background-color: #22c55e; /* Tailwind's green-500 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: white;
+    font-weight: bold;
+    margin-bottom: 10px; /* Space below hexagon for text */
+}
+.hexagon:before,
+.hexagon:after {
+    content: "";
+    position: absolute;
+    width: 0;
+    border-left: 40px solid transparent; /* Adjust for new width */
+    border-right: 40px solid transparent; /* Adjust for new width */
+}
+.hexagon:before {
+    bottom: 100%;
+    border-bottom: 22px solid #22c55e; /* Adjust for new height */
+}
+.hexagon:after {
+    top: 100%;
+    border-top: 22px solid #22c55e; /* Adjust for new height */
+}
+
+.infopill {
+    background-color: rgba(60, 64, 79, 0.6) !important;
+}
+
+mat-row[cdkDrag] {
+    cursor: move;
+}
+
+//table {
+//    width: 100%;
+//}
+mat-table {
+    background-color: rgba(60, 64, 79, 0.6) !important;
+    border-radius: 0.375rem; /* Optional: Adds rounded corners to the table */
+}
+
+.cdk-drag-preview {
+    box-sizing: border-box;
+    border-radius: 4px;
+    box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
+    0 8px 10px 1px rgba(0, 0, 0, 0.14),
+    0 3px 14px 2px rgba(0, 0, 0, 0.12);
+    // background-color: white;
+}
+
+.cdk-drag-placeholder {
+    opacity: 0;
+}
+
+.cdk-drag-animating {
+    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.cdk-drop-list-dragging .mat-row:not(.cdk-drag-placeholder) {
+    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}

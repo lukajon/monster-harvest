@@ -1,92 +1,126 @@
-<div>
-    <div class="form-check form-switch">
-        <input class="form-check-input" type="checkbox" role="switch" id="switchDMMode" (change)="toggleDMMode()">
-        <label class="form-check-label" for="switchDMMode">DM Mode</label>
-    </div>
-    <ng-container *ngIf="dmMode">
-        <select id="monsterTypeSelect" class="form-select" (change)="onMonsterTypeChange($event)">
-            <option value="" disabled selected hidden>Creature Type</option>
-            <option *ngFor="let type of monsterTypes" [value]="type">{{ type }}</option>
-        </select>
-        <select id="monsterSizeSelect" class="form-select" (change)="onMonsterSizeChange($event)">
-            <option value="" disabled selected hidden>Creature Size</option>
-            <option *ngFor="let size of monsterSizes" [value]="size">{{ size }}</option>
-        </select>
-        <select id="monsterCRSelect" class="form-select" (change)="onMonsterCRChange($event)">
-            <option value="" disabled selected hidden>CR</option>
-            <option *ngFor="let cr of monsterCR" [value]="cr">{{ cr }}</option>
-        </select>
-    </ng-container>
-</div>
-
-<div *ngIf="sizeMessage" class="mt-2">{{ sizeMessage }}</div>
-<div *ngIf="crMessage" class="mt-2">{{ crMessage }}</div>
-<div>
-    <h4>Harvest DC: {{ currentDC }}</h4>
-</div>
-
-<div cdkDropListGroup class="flex flex-wrap gap-4">
-    <div class="flex-1 min-w-72">
-        <h6>Harvest List</h6>
-        <mat-table #toHarvestTable [dataSource]="toHarvest" cdkDropList id="toHarvestTable" (cdkDropListDropped)="drop($event)"
-                   [cdkDropListData]="toHarvest">
-
-            <ng-container matColumnDef="dc">
-                <mat-header-cell *matHeaderCellDef> DC </mat-header-cell>
-                <mat-cell *matCellDef="let element" (click)="moveToNotToHarvest(element)"> {{element.dc}} </mat-cell>
-            </ng-container>
-
-            <ng-container matColumnDef="type">
-                <mat-header-cell *matHeaderCellDef> Type </mat-header-cell>
-                <mat-cell *matCellDef="let element" (click)="moveToNotToHarvest(element)"> {{element.type}} </mat-cell>
-            </ng-container>
-
-            <ng-container matColumnDef="creature component">
-                <mat-header-cell *matHeaderCellDef> Component </mat-header-cell>
-                <mat-cell *matCellDef="let element" (click)="moveToNotToHarvest(element)"> {{element.component}} </mat-cell>
-            </ng-container>
-
-            <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-            <mat-row *matRowDef="let row; columns: displayedColumns;" cdkDrag [cdkDragData]="row">
-            </mat-row>
-        </mat-table>
+<div class="main-container space-y-4">
+    <div class="flex items-center gap-4">
+        <div class="form-check form-switch flex items-center">
+            <input class="form-check-input" type="checkbox" role="switch" id="switchDMMode" (change)="toggleDMMode()">
+            <label class="form-check-label ml-2" for="switchDMMode">DM Mode</label>
+        </div>
+        <ng-container *ngIf="dmMode">
+            <select id="monsterTypeSelect" class="form-select w-40 mr-3" (change)="onMonsterTypeChange($event)">
+                <option value="" disabled selected hidden>Creature Type</option>
+                <option *ngFor="let type of monsterTypes" [value]="type">{{ type }}</option>
+            </select>
+            <select id="monsterSizeSelect" class="form-select w-40 mr-3" (change)="onMonsterSizeChange($event)">
+                <option value="" disabled selected hidden>Creature Size</option>
+                <option *ngFor="let size of monsterSizes" [value]="size">{{ size }}</option>
+            </select>
+            <select id="monsterCRSelect" class="form-select w-40 mr-3" (change)="onMonsterCRChange($event)">
+                <option value="" disabled selected hidden>CR</option>
+                <option *ngFor="let cr of monsterCR" [value]="cr">{{ cr }}</option>
+            </select>
+        </ng-container>
     </div>
 
-    <div class="flex-1 min-w-72">
-        <h6>Available Components</h6>
-        <mat-table #notToHarvestTable [dataSource]="dmMode ? notToHarvest : activeNotToHarvest" cdkDropList id="notToHarvestTable" (cdkDropListDropped)="drop($event)"
-                   [cdkDropListData]="dmMode ? notToHarvest : activeNotToHarvest">
+    <div class="flex justify-center items-center">
+        <div class="flex space-x-20 items-center pt-2 pb-2 pl-6 pr-6 rounded-full infopill">
+            <div class="flex items-center">
+                <i class="ra ra-perspective-dice-six mr-2 text-5xl"></i>
+                <div class="text-center">
+                    <div>
+                        <span class="text-sm">Harvest DC</span>
+                    </div>
+                    <div>
+                        <span class="text-4xl font-bold">{{ currentDC }}</span>
+                    </div>
+                </div>
+            </div>
 
-            <ng-container matColumnDef="dc">
-                <mat-header-cell *matHeaderCellDef> DC </mat-header-cell>
-                <mat-cell *matCellDef="let element" (click)="moveToHarvest(element)"> {{element.dc}} </mat-cell>
-            </ng-container>
+            <div *ngIf="sizeMessage" class="flex items-center font-bold">
+                <i class="ra ra-hourglass text-5xl mr-2"></i>
+                <span>{{ sizeMessage }}</span>
+            </div>
 
-            <ng-container matColumnDef="type">
-                <mat-header-cell *matHeaderCellDef> Type </mat-header-cell>
-                <mat-cell *matCellDef="let element" (click)="moveToHarvest(element)"> {{element.type}} </mat-cell>
-            </ng-container>
+            <div *ngIf="crMessage" class="flex items-center text-center">
+                <i class="ra ra-bottle-vapors text-5xl mr-2"></i>
+                <div>
+                    <span class="text-sm">Essence</span>
+                    <span class="block font-bold">{{ crMessage.split('(')[0] }}</span>
+                    <span *ngIf="crMessage.includes('(')" class="text-sm block">
+                    ({{ crMessage.split('(')[1].split(')')[0] }})
+                </span>
+                </div>
+            </div>
+        </div>
+    </div>
 
-            <ng-container matColumnDef="creature component">
-                <mat-header-cell *matHeaderCellDef> Component </mat-header-cell>
-                <mat-cell *matCellDef="let element" (click)="moveToHarvest(element)"> {{element.component}} </mat-cell>
-            </ng-container>
+    <div cdkDropListGroup class="flex flex-wrap gap-4">
+        <div class="flex-1 min-w-72">
+            <div class="flex items-center justify-center mb-2 text-xl font-semibold">
+                <i class="ra ra-quill-ink text-xl mr-2"></i>
+                <span>Harvest List</span>
+            </div>
+            <mat-table #toHarvestTable [dataSource]="toHarvest" cdkDropList id="toHarvestTable" (cdkDropListDropped)="drop($event)"
+                       [cdkDropListData]="toHarvest" class="rounded-lg overflow-hidden">
 
-            <ng-container *ngIf="dmMode" matColumnDef="actions">
-                <mat-header-cell *matHeaderCellDef> Actions </mat-header-cell>
-                <mat-cell *matCellDef="let element">
-                    <button mat-icon-button color="primary" (click)="cloneComponent(element)">
-                        <mat-icon>content_copy</mat-icon>
-                    </button>
-                    <button mat-icon-button color="warn" (click)="toggleActive(element)">
-                        <mat-icon>{{ element.active ? 'visibility' : 'visibility_off' }}</mat-icon>
-                    </button>
-                </mat-cell>
-            </ng-container>
+                <ng-container matColumnDef="dc">
+                    <mat-header-cell *matHeaderCellDef style="flex: 0 1 50px;"> DC </mat-header-cell>
+                    <mat-cell *matCellDef="let element" (click)="moveToNotToHarvest(element)" style="flex: 0 1 50px;"> {{element.dc}} </mat-cell>
+                </ng-container>
 
-            <mat-header-row *matHeaderRowDef="dmMode ? displayedColumns.concat(['actions']) : displayedColumns"></mat-header-row>
-            <mat-row *matRowDef="let row; columns: dmMode ? displayedColumns.concat(['actions']) : displayedColumns;" cdkDrag [cdkDragData]="row">
-            </mat-row>
-        </mat-table>
+                <ng-container matColumnDef="type">
+                    <mat-header-cell *matHeaderCellDef style="flex: 0 1 120px;"> Type </mat-header-cell>
+                    <mat-cell *matCellDef="let element" (click)="moveToNotToHarvest(element)" style="flex: 0 1 120px;"> {{element.type}} </mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="creature component">
+                    <mat-header-cell *matHeaderCellDef> Component </mat-header-cell>
+                    <mat-cell *matCellDef="let element" (click)="moveToNotToHarvest(element)"> {{element.component}} </mat-cell>
+                </ng-container>
+
+                <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                <mat-row *matRowDef="let row; columns: displayedColumns;" cdkDrag [cdkDragData]="row">
+                </mat-row>
+            </mat-table>
+        </div>
+
+        <div class="flex-1 min-w-72">
+            <div class="flex items-center justify-center mb-2 text-xl font-semibold">
+                <i class="ra ra-two-dragons text-xl mr-2"></i>
+                <span>Available Components</span>
+            </div>
+            <mat-table #notToHarvestTable [dataSource]="dmMode ? notToHarvest : activeNotToHarvest" cdkDropList id="notToHarvestTable" (cdkDropListDropped)="drop($event)"
+                       [cdkDropListData]="dmMode ? notToHarvest : activeNotToHarvest" class="rounded-lg overflow-hidden">
+
+                <ng-container matColumnDef="dc">
+                    <mat-header-cell *matHeaderCellDef style="flex: 0 1 50px;"> DC </mat-header-cell>
+                    <mat-cell *matCellDef="let element" (click)="moveToHarvest(element)" style="flex: 0 1 50px;"> {{element.dc}} </mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="type">
+                    <mat-header-cell *matHeaderCellDef style="flex: 0 1 120px;"> Type </mat-header-cell>
+                    <mat-cell *matCellDef="let element" (click)="moveToHarvest(element)" style="flex: 0 1 120px;"> {{element.type}} </mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="creature component">
+                    <mat-header-cell *matHeaderCellDef> Component </mat-header-cell>
+                    <mat-cell *matCellDef="let element" (click)="moveToHarvest(element)"> {{element.component}} </mat-cell>
+                </ng-container>
+
+                <ng-container *ngIf="dmMode" matColumnDef="actions">
+                    <mat-header-cell *matHeaderCellDef> Actions </mat-header-cell>
+                    <mat-cell *matCellDef="let element">
+                        <button mat-icon-button color="primary" (click)="cloneComponent(element)">
+                            <mat-icon>content_copy</mat-icon>
+                        </button>
+                        <button mat-icon-button color="warn" (click)="toggleActive(element)">
+                            <mat-icon>{{ element.active ? 'visibility' : 'visibility_off' }}</mat-icon>
+                        </button>
+                    </mat-cell>
+                </ng-container>
+
+                <mat-header-row *matHeaderRowDef="dmMode ? displayedColumns.concat(['actions']) : displayedColumns"></mat-header-row>
+                <mat-row *matRowDef="let row; columns: dmMode ? displayedColumns.concat(['actions']) : displayedColumns;" cdkDrag [cdkDragData]="row">
+                </mat-row>
+            </mat-table>
+        </div>
     </div>
 </div>

@@ -22,6 +22,8 @@
     "@angular/router": "^18.2.0",
     "@owlbear-rodeo/sdk": "3.0.0",
     "bootstrap": "5.3.3",
+    "bootstrap-icons": "1.11.3",
+    "rpg-awesome": "0.2.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.14.10"
