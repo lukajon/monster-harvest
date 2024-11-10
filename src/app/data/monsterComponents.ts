@@ -12,6 +12,7 @@ export interface MonsterComponent {
     type: string;
     component: string;
     id: string;
+    active: boolean;
 }
 
 export const monsterComponents: MonsterComponents = {
@@ -45,6 +46,7 @@ function flattenMonsterData(type: keyof MonsterComponents): MonsterComponent[] {
                 type: type.toString(),
                 component: component,
                 id: `${type}-${entry.dc}-${component}`, // Unique ID based on type, DC, and part
+                active: false,
             }))
         ) || []
     );

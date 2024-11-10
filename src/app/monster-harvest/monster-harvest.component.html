@@ -28,7 +28,7 @@
 <div cdkDropListGroup class="flex flex-wrap gap-4">
     <div class="flex-1 min-w-72">
         <h6>Harvest List</h6>
-        <mat-table #toHarvestTable [dataSource]="toHarvest" cdkDropList (cdkDropListDropped)="drop($event)"
+        <mat-table #toHarvestTable [dataSource]="toHarvest" cdkDropList id="toHarvestTable" (cdkDropListDropped)="drop($event)"
                    [cdkDropListData]="toHarvest">
 
             <ng-container matColumnDef="dc">
@@ -54,8 +54,8 @@
 
     <div class="flex-1 min-w-72">
         <h6>Available Components</h6>
-        <mat-table #notToHarvestTable [dataSource]="notToHarvest" cdkDropList (cdkDropListDropped)="drop($event)"
-                   [cdkDropListData]="notToHarvest">
+        <mat-table #notToHarvestTable [dataSource]="dmMode ? notToHarvest : activeNotToHarvest" cdkDropList id="notToHarvestTable" (cdkDropListDropped)="drop($event)"
+                   [cdkDropListData]="dmMode ? notToHarvest : activeNotToHarvest">
 
             <ng-container matColumnDef="dc">
                 <mat-header-cell *matHeaderCellDef> DC </mat-header-cell>
@@ -72,8 +72,20 @@
                 <mat-cell *matCellDef="let element"> {{element.component}} </mat-cell>
             </ng-container>
 
-            <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-            <mat-row *matRowDef="let row; columns: displayedColumns;" cdkDrag [cdkDragData]="row">
+            <ng-container *ngIf="dmMode" matColumnDef="actions">
+                <mat-header-cell *matHeaderCellDef> Actions </mat-header-cell>
+                <mat-cell *matCellDef="let element">
+                    <button mat-icon-button color="primary" (click)="cloneComponent(element)">
+                        <mat-icon>content_copy</mat-icon>
+                    </button>
+                    <button mat-icon-button color="warn" (click)="toggleActive(element)">
+                        <mat-icon>{{ element.active ? 'visibility' : 'visibility_off' }}</mat-icon>
+                    </button>
+                </mat-cell>
+            </ng-container>
+
+            <mat-header-row *matHeaderRowDef="dmMode ? displayedColumns.concat(['actions']) : displayedColumns"></mat-header-row>
+            <mat-row *matRowDef="let row; columns: dmMode ? displayedColumns.concat(['actions']) : displayedColumns;" cdkDrag [cdkDragData]="row">
             </mat-row>
         </mat-table>
     </div>

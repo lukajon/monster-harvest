@@ -12,6 +12,7 @@ import {
 import {MatTable, MatTableModule} from '@angular/material/table';
 import {MatIcon} from '@angular/material/icon';
 import OBR from '@owlbear-rodeo/sdk';
+import {MatIconButton} from '@angular/material/button';
 
 const METADATA_KEY = "com.lukajon.monsterHarvest/harvestData";
 
@@ -33,7 +34,8 @@ interface HarvestMetadata {
         CdkDrag,
         MatTableModule,
         DragDropModule,
-        MatIcon
+        MatIcon,
+        MatIconButton
     ],
     templateUrl: './monster-harvest.component.html',
     styleUrl: './monster-harvest.component.scss'
@@ -151,6 +153,7 @@ export class MonsterHarvestComponent implements OnInit, OnDestroy {
 
     public toggleDMMode(): void {
         this.dmMode = !this.dmMode;
+        this.notToHarvestTable?.renderRows();
     }
 
     // Load components based on the selected monster type
@@ -158,7 +161,9 @@ export class MonsterHarvestComponent implements OnInit, OnDestroy {
         const selectElement = event.target as HTMLSelectElement;
         this.selectedType = selectElement.value;
         this.loadMonsterComponents(this.selectedType);
+        console.log('before selectedEssence: ', this.selectedEssence);
         if (this.selectedEssence) {
+            console.log('selectedEssence');
             this.addEssenceToAvailable(this.selectedEssence);
         }
 
@@ -177,7 +182,7 @@ export class MonsterHarvestComponent implements OnInit, OnDestroy {
         this.crMessage = this.crEssences[selectedCR]?.message || '';
 
         if (this.selectedEssence) {
-            this.removeEssenceFromAvailable(this.selectedEssence);
+            this.removeEssenceFromAvailable();
         }
 
         const essence = this.crEssences[selectedCR]?.essence;
@@ -192,24 +197,70 @@ export class MonsterHarvestComponent implements OnInit, OnDestroy {
     }
 
     public async drop(event: CdkDragDrop<MonsterComponent[]>) {
+
         if (event.previousContainer === event.container) {
             moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
-            this.toHarvestTable?.renderRows();
-            this.notToHarvestTable?.renderRows();
         } else {
+            // component from the list it is moved away from
+            const movedComponent = event.item.data;
+            // event.container is the table it gets moved to
+            if (event.container.id === 'toHarvestTable') {
+                movedComponent.active = false;
+            } else {
+                this.setComponentActiveState(movedComponent.id);
+            }
+
             transferArrayItem(
                 event.previousContainer.data,
                 event.container.data,
                 event.previousIndex,
                 event.currentIndex,
             );
-            this.toHarvestTable?.renderRows();
-            this.notToHarvestTable?.renderRows();
 
             this.calculateDC();
         }
 
+        this.toHarvestTable?.renderRows();
+        this.notToHarvestTable?.renderRows();
+
         await this.saveHarvestData();
+        this.cdr.detectChanges();
+    }
+
+    private setComponentActiveState(componentId: string): void {
+        // Find the component in notToHarvest with the matching ID and set its active state
+        const component = this.notToHarvest.find(comp => comp.id === componentId && !comp.active);
+        if (component) {
+            component.active = true;
+        }
+    }
+
+    public async cloneComponent(component: MonsterComponent): Promise<void> {
+        const clonedComponent = {...component};
+        clonedComponent.active = true;
+        this.notToHarvest.push(clonedComponent);
+
+        this.notToHarvest.sort((a, b) => {
+            if (a.dc !== b.dc) {
+                return a.dc - b.dc;
+            }
+            return a.component.localeCompare(b.component);
+        });
+
+        this.notToHarvestTable?.renderRows();
+        await this.saveHarvestData();
+    }
+
+    public async toggleActive(component: MonsterComponent): Promise<void> {
+        component.active = !component.active;
+        this.notToHarvest = [...this.notToHarvest];
+        this.cdr.detectChanges();
+        this.notToHarvestTable?.renderRows();
+        await this.saveHarvestData();
+    }
+
+    public get activeNotToHarvest(): MonsterComponent[] {
+        return this.notToHarvest.filter(component => component.active);
     }
 
     // Populate "To Harvest" and "Not to Harvest" lists with creature components
@@ -219,7 +270,8 @@ export class MonsterHarvestComponent implements OnInit, OnDestroy {
                 dc: entry.dc,
                 type: type.toString(),
                 component: component,
-                id: `${type}-${entry.dc}-${component}`,
+                id: `${entry.dc}-${type}-${component}`,
+                active: false,
             }))
         );
         this.toHarvest = [];
@@ -240,18 +292,18 @@ export class MonsterHarvestComponent implements OnInit, OnDestroy {
 
     private crEssences: { [key: string]: { message: string, essence: MonsterComponent | null } } = {
         'less than 3': { message: 'You cannot extract an essence.', essence: null },
-        '3 to 6': { message: 'Frail essence can be extracted. Used for uncommon magic items.', essence: { dc: 25, type: 'essence', component: 'Frail Essence', id: 'essence-3-6' }},
-        '7 to 11': { message: 'Robust essence can be extracted. Used for rare magic items.', essence: { dc: 30, type: 'essence', component: 'Robust Essence', id: 'essence-7-11' }},
-        '12 to 17': { message: 'Potent essence can be extracted. Used for very rare magic items.', essence: { dc: 35, type: 'essence', component: 'Potent Essence', id: 'essence-12-17' }},
-        '18 to 24': { message: 'Mythic essence can be extracted. Used for legendary magic items.', essence: { dc: 40, type: 'essence', component: 'Mythic Essence', id: 'essence-18-24' }},
-        '25+': { message: 'Deific essence can be extracted. Used for artifacts.', essence: { dc: 50, type: 'essence', component: 'Deific Essence', id: 'essence-25+' }},
+        '3 to 6': { message: 'Frail essence can be extracted. Used for uncommon magic items.', essence: { dc: 25, type: 'essence', component: 'Frail Essence', id: 'essence-3-6', active: true }},
+        '7 to 11': { message: 'Robust essence can be extracted. Used for rare magic items.', essence: { dc: 30, type: 'essence', component: 'Robust Essence', id: 'essence-7-11', active: true }},
+        '12 to 17': { message: 'Potent essence can be extracted. Used for very rare magic items.', essence: { dc: 35, type: 'essence', component: 'Potent Essence', id: 'essence-12-17', active: true }},
+        '18 to 24': { message: 'Mythic essence can be extracted. Used for legendary magic items.', essence: { dc: 40, type: 'essence', component: 'Mythic Essence', id: 'essence-18-24', active: true }},
+        '25+': { message: 'Deific essence can be extracted. Used for artifacts.', essence: { dc: 50, type: 'essence', component: 'Deific Essence', id: 'essence-25+', active: true }},
     };
 
     private addEssenceToAvailable(essence: MonsterComponent): void {
         this.notToHarvest.push(essence);
     }
 
-    private removeEssenceFromAvailable(essence: MonsterComponent): void {
-        this.notToHarvest = this.notToHarvest.filter(component => component.id !== essence.id);
+    private removeEssenceFromAvailable(): void {
+        this.notToHarvest = this.notToHarvest.filter(component => component.type !== 'essence');
     }
 }
