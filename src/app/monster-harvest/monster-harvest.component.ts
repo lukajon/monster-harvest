@@ -1,4 +1,4 @@
-import {Component, ViewChild} from '@angular/core';
+import {ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {MonsterComponent, MonsterComponents, monsterComponents} from '../data/monsterComponents';
 import {
@@ -11,6 +11,17 @@ import {
 } from '@angular/cdk/drag-drop';
 import {MatTable, MatTableModule} from '@angular/material/table';
 import {MatIcon} from '@angular/material/icon';
+import OBR from '@owlbear-rodeo/sdk';
+
+const METADATA_KEY = "com.lukajon.monsterHarvest/harvestData";
+
+interface HarvestMetadata {
+    toHarvest: any[];
+    notToHarvest: any[];
+    sizeMessage: string;
+    crMessage: string;
+    currentDC: number;
+}
 
 @Component({
     selector: 'app-monster-harvest',
@@ -27,7 +38,7 @@ import {MatIcon} from '@angular/material/icon';
     templateUrl: './monster-harvest.component.html',
     styleUrl: './monster-harvest.component.scss'
 })
-export class MonsterHarvestComponent {
+export class MonsterHarvestComponent implements OnInit, OnDestroy {
     public dmMode: boolean = false;
     public monsterTypes = Object.keys(monsterComponents);
     public monsterSizes = ['Tiny', 'Small', 'Medium', 'Large', 'Huge', 'Gargantuan'];
@@ -43,26 +54,125 @@ export class MonsterHarvestComponent {
     @ViewChild('toHarvestTable', {static: true}) toHarvestTable: MatTable<MonsterComponent> | undefined;
     @ViewChild('notToHarvestTable', {static: true}) notToHarvestTable: MatTable<MonsterComponent> | undefined;
 
+    private unsubscribeFromMetadataChange: (() => void) | undefined;
+
+    constructor(private cdr: ChangeDetectorRef) {} // Inject ChangeDetectorRef
+
+    ngOnInit(): void {
+        // Wait until OBR SDK is ready, then set up listeners and load initial data
+        OBR.onReady(() => {
+            this.subscribeToMetadataChanges();
+            this.loadHarvestData();
+        });
+    }
+
+    ngOnDestroy(): void {
+        // Unsubscribe from metadata changes when the component is destroyed
+        if (this.unsubscribeFromMetadataChange) {
+            this.unsubscribeFromMetadataChange();
+        }
+    }
+
+    private subscribeToMetadataChanges(): void {
+        // Listen for changes in the room metadata
+        this.unsubscribeFromMetadataChange = OBR.room.onMetadataChange((metadata) => {
+            const data = metadata[METADATA_KEY] as HarvestMetadata | undefined;
+            console.log("Metadata changed:", data);
+
+            if (data) {
+                // Update local lists with the shared data
+                this.toHarvest = data.toHarvest || [];
+                this.notToHarvest = data.notToHarvest || [];
+                this.sizeMessage = data.sizeMessage;
+                this.crMessage = data.crMessage;
+                this.currentDC = data.currentDC;
+                console.log("Harvest data loaded successfully.");
+                this.toHarvestTable?.renderRows();
+                this.notToHarvestTable?.renderRows();
+                this.cdr.detectChanges();
+            } else {
+                // If no data is present, initialize the lists as empty
+                this.resetHarvestData();
+            }
+        });
+    }
+
+    // Save `toHarvest` and `notToHarvest` lists to Owlbear metadata
+    private async saveHarvestData(): Promise<void> {
+        try {
+            await OBR.room.setMetadata({
+                [METADATA_KEY]: {
+                    toHarvest: this.toHarvest,
+                    notToHarvest: this.notToHarvest,
+                    sizeMessage: this.sizeMessage,
+                    crMessage: this.crMessage,
+                    currentDC: this.currentDC
+                }
+            });
+            console.log("Harvest data saved successfully.");
+        } catch (error) {
+            console.error("Failed to save harvest data:", error);
+        }
+    }
+
+    // Load `toHarvest` and `notToHarvest` lists from Owlbear metadata
+    private async loadHarvestData(): Promise<void> {
+        try {
+            const metadata = await OBR.room.getMetadata();
+            const data = metadata[METADATA_KEY] as HarvestMetadata | undefined;
+
+            if (data) {
+                // Populate `toHarvest` and `notToHarvest` if data exists
+                this.toHarvest = data.toHarvest || [];
+                this.notToHarvest = data.notToHarvest || [];
+                this.sizeMessage = data.sizeMessage;
+                this.crMessage = data.crMessage;
+                this.currentDC = data.currentDC;
+                console.log("Harvest data loaded successfully.");
+
+                // Trigger change detection to update the view
+                this.cdr.detectChanges();
+            } else {
+                console.log("No harvest data found in metadata.");
+            }
+        } catch (error) {
+            console.error("Failed to load harvest data:", error);
+        }
+    }
+
+    // Reset harvest data if no metadata exists
+    private resetHarvestData(): void {
+        this.toHarvest = [];
+        this.notToHarvest = [];
+        this.sizeMessage = '';
+        this.crMessage = '';
+        this.currentDC = 0;
+    }
+
     public toggleDMMode(): void {
         this.dmMode = !this.dmMode;
     }
 
     // Load components based on the selected monster type
-    public onMonsterTypeChange(event: Event): void {
+    public async onMonsterTypeChange(event: Event): Promise<void> {
         const selectElement = event.target as HTMLSelectElement;
         this.selectedType = selectElement.value;
         this.loadMonsterComponents(this.selectedType);
         if (this.selectedEssence) {
             this.addEssenceToAvailable(this.selectedEssence);
         }
+
+        await this.saveHarvestData();
     }
 
-    public onMonsterSizeChange(event: Event): void {
+    public async onMonsterSizeChange(event: Event): Promise<void> {
         const selectedSize = (event.target as HTMLSelectElement).value;
         this.sizeMessage = this.sizeMessages[selectedSize] || '';
+
+        await this.saveHarvestData();
     }
 
-    public onMonsterCRChange(event: Event): void {
+    public async onMonsterCRChange(event: Event): Promise<void> {
         const selectedCR = (event.target as HTMLSelectElement).value;
         this.crMessage = this.crEssences[selectedCR]?.message || '';
 
@@ -77,9 +187,11 @@ export class MonsterHarvestComponent {
 
         this.selectedEssence = essence;
         this.notToHarvestTable?.renderRows();
+
+        await this.saveHarvestData();
     }
 
-    public drop(event: CdkDragDrop<MonsterComponent[]>) {
+    public async drop(event: CdkDragDrop<MonsterComponent[]>) {
         if (event.previousContainer === event.container) {
             moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
             this.toHarvestTable?.renderRows();
@@ -96,6 +208,8 @@ export class MonsterHarvestComponent {
 
             this.calculateDC();
         }
+
+        await this.saveHarvestData();
     }
 
     // Populate "To Harvest" and "Not to Harvest" lists with creature components
