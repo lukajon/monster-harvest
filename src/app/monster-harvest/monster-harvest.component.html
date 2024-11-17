@@ -73,7 +73,7 @@
 
                 <ng-container matColumnDef="creature component">
                     <mat-header-cell *matHeaderCellDef> Component </mat-header-cell>
-                    <mat-cell *matCellDef="let element" (click)="moveToNotToHarvest(element)"> {{element.component}} </mat-cell>
+                    <mat-cell *matCellDef="let element" (click)="moveToNotToHarvest(element)" [innerHTML]="element.component"> {{element.component}} </mat-cell>
                 </ng-container>
 
                 <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
@@ -102,7 +102,7 @@
 
                 <ng-container matColumnDef="creature component">
                     <mat-header-cell *matHeaderCellDef> Component </mat-header-cell>
-                    <mat-cell *matCellDef="let element" (click)="moveToHarvest(element)"> {{element.component}} </mat-cell>
+                    <mat-cell *matCellDef="let element" (click)="moveToHarvest(element)" [innerHTML]="element.component"> {{element.component}} </mat-cell>
                 </ng-container>
 
                 <ng-container *ngIf="dmMode" matColumnDef="actions">
