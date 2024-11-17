@@ -13,6 +13,8 @@ import {MatTable, MatTableModule} from '@angular/material/table';
 import {MatIcon} from '@angular/material/icon';
 import OBR from '@owlbear-rodeo/sdk';
 import {MatIconButton} from '@angular/material/button';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatInputModule} from '@angular/material/input';
 
 const METADATA_KEY = "com.lukajon.monsterHarvest/harvestData";
 
@@ -22,6 +24,7 @@ interface HarvestMetadata {
     selectedSize: string;
     selectedCR: string;
     currentDC: number;
+    harvestCheck: number;
 }
 
 @Component({
@@ -35,7 +38,9 @@ interface HarvestMetadata {
         MatTableModule,
         DragDropModule,
         MatIcon,
-        MatIconButton
+        MatIconButton,
+        MatFormFieldModule,
+        MatInputModule
     ],
     templateUrl: './monster-harvest.component.html',
     styleUrl: './monster-harvest.component.scss'
@@ -54,7 +59,10 @@ export class MonsterHarvestComponent implements OnInit, OnDestroy {
     public toHarvest: MonsterComponent[] = [];
     public notToHarvest: MonsterComponent[] = [];
     public currentDC: number = 0;
+    public harvestCheck: number = 0;
+    public showInfoAlert = true;
     public displayedColumns: string[] = ['dc', 'type', 'creature component'];
+    public displayedColumnsHarvestList: string[] = ['cumulativeDC', 'dc', 'type', 'creature component'];
     @ViewChild('toHarvestTable', {static: true}) toHarvestTable: MatTable<MonsterComponent> | undefined;
     @ViewChild('notToHarvestTable', {static: true}) notToHarvestTable: MatTable<MonsterComponent> | undefined;
 
@@ -104,6 +112,7 @@ export class MonsterHarvestComponent implements OnInit, OnDestroy {
         this.setCRMessage(this.selectedCR);
         this.setSelectedEssence(this.selectedCR);
         this.currentDC = data.currentDC;
+        this.harvestCheck = data.harvestCheck;
 
         console.log("Harvest data loaded successfully.");
 
@@ -121,7 +130,8 @@ export class MonsterHarvestComponent implements OnInit, OnDestroy {
                     notToHarvest: this.notToHarvest,
                     selectedSize: this.selectedSize,
                     selectedCR: this.selectedCR,
-                    currentDC: this.currentDC
+                    currentDC: this.currentDC,
+                    harvestCheck: this.harvestCheck
                 }
             });
             console.log("Harvest data saved successfully.");
@@ -140,6 +150,7 @@ export class MonsterHarvestComponent implements OnInit, OnDestroy {
                 // Populate `toHarvest` and `notToHarvest` if data exists
                 this.updateLocalLists(data);
                 console.log("Harvest data loaded successfully.");
+                console.log('Harvest Data:', data);
 
                 // Trigger change detection to update the view
                 this.cdr.detectChanges();
@@ -158,6 +169,7 @@ export class MonsterHarvestComponent implements OnInit, OnDestroy {
         this.selectedSize = '';
         this.selectedCR = '';
         this.currentDC = 0;
+        this.harvestCheck = 0;
     }
 
     public toggleDMMode(): void {
@@ -330,6 +342,28 @@ export class MonsterHarvestComponent implements OnInit, OnDestroy {
         this.currentDC = this.toHarvest.reduce((total, component) => total + component.dc, 0);
     }
 
+    public updateHarvestCheck(event: Event): void {
+        const inputValue = (event.target as HTMLInputElement).value;
+        this.harvestCheck = inputValue ? parseInt(inputValue, 10) : 0;
+        this.saveHarvestData();
+    }
+
+    public calculateCumulativeDC(index: number): number {
+        let cumulativeDC = 0;
+        for (let i = 0; i <= index; i++) {
+            cumulativeDC += this.toHarvest[i]?.dc || 0;
+        }
+        return cumulativeDC;
+    }
+
+    public openCheckInfo() {
+        this.showInfoAlert = true;
+    }
+
+    public closeCheckInfo(): void {
+        this.showInfoAlert = false;
+    }
+
     private sizeMessages: { [key: string]: string } = {
         Tiny: '5 min',
         Small: '10 min',
@@ -356,6 +390,23 @@ export class MonsterHarvestComponent implements OnInit, OnDestroy {
     //     '18 to 24': { name: 'Mythic essence (legendary)', message: 'Mythic essence can be extracted. Used for legendary magic items.', essence: { dc: 40, type: 'essence', component: 'Mythic Essence', id: 'essence-18-24', active: true }},
     //     '25+': { name: 'Deific essence (artifacts)', message: 'Deific essence can be extracted. Used for artifacts.', essence: { dc: 50, type: 'essence', component: 'Deific Essence', id: 'essence-25+', active: true }},
     // };
+
+    public creatureTypesAndSkills: { [key: string] : { harvestSkill: string, ritual: boolean } } = {
+        'Aberration': { harvestSkill: 'Arcana', ritual: true },
+        'Beast': { harvestSkill: 'Survival', ritual: false },
+        'Celestial': { harvestSkill: 'Religion', ritual: true },
+        'Construct': { harvestSkill: 'Investigation', ritual: false },
+        'Dragon': { harvestSkill: 'Survival', ritual: false },
+        'Elemental': { harvestSkill: 'Arcana', ritual: true },
+        'Fey': { harvestSkill: 'Arcana', ritual: true },
+        'Fiend': { harvestSkill: 'Religion', ritual: true },
+        'Giant': { harvestSkill: 'Medicine', ritual: false },
+        'Humanoid': { harvestSkill: 'Medicine', ritual: false },
+        'Monstrosity': { harvestSkill: 'Survival', ritual: false },
+        'Ooze': { harvestSkill: 'Nature', ritual: false },
+        'Plant': { harvestSkill: 'Nature', ritual: false },
+        'Undead': { harvestSkill: 'Medicine', ritual: false },
+    }
 
     private addEssenceToAvailable(essence: MonsterComponent): void {
         this.notToHarvest.push(essence);

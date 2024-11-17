@@ -32,7 +32,54 @@
     background-color: rgba(60, 64, 79, 0.6) !important;
 }
 
-mat-row[cdkDrag] {
+/* Toggle Switch */
+/* Subtle grey when the switch is off */
+.form-check-input:checked {
+    background-color: #00DDDD; /* Blue when checked */
+    border-color: #00DDDD;
+}
+
+/* For when the switch is off, we use a light grey background */
+.form-check-input {
+    background-color: #dcdcdc; /* Light grey background */
+    border-color: #ccc; /* Light grey border */
+}
+
+/* Adjust the thumb (circle) color when the switch is off */
+.form-check-input:checked[type="checkbox"] {
+    background-color: #00DDDD !important; /* Green thumb */
+}
+
+/* Subtle grey thumb when off */
+.form-check-input[type="checkbox"] {
+    background-color: #bbb; /* Grey thumb */
+}
+
+/* Change the color when hovered over the switch */
+.form-check-input:hover {
+    background-color: #bbb; /* Slightly darker grey when hovered */
+}
+
+/* Change the color of the thumb when hovered */
+.form-check-input:checked:hover {
+    background-color: #00DDDD; /* Darker blue when hovered */
+}
+
+/* Apply a custom focus outline color that matches #00DDDD */
+.form-check-input:focus {
+    outline: 2px rgba(0, 221, 221, 0.1); /* Custom outline color */
+    box-shadow: 0 0 0 3px rgba(0, 221, 221, 0.6); /* Light shadow with the same color */
+}
+
+//mat-row[cdkDrag] {
+//    cursor: move;
+//}
+
+mat-row.dm-mode {
+    cursor: pointer;
+}
+
+mat-row.move-mode {
     cursor: move;
 }
 
@@ -63,4 +110,83 @@ mat-table {
 
 .cdk-drop-list-dragging .mat-row:not(.cdk-drag-placeholder) {
     transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.bg-green-100 {
+    background-color: rgba(16, 185, 129, 0.3) !important; /* Tailwind green */
+}
+
+.bg-red-100 {
+    background-color: rgba(239, 68, 68, 0.3) !important; /* Tailwind red */
+}
+
+mat-header-cell.dc-column,
+mat-cell.dc-column {
+    text-align: center;
+    justify-content: center;
+    display: flex;
+}
+
+mat-header-cell.dc-column {
+    margin-left: 0 !important;
+}
+
+mat-header-cell.sum-dc-column,
+mat-cell.sum-dc-column {
+    background-color: rgba(90, 94, 109, 0.6);
+    border-right: 1px solid #889392;
+    padding-right: 25px;
+}
+
+:host ::ng-deep {
+    .mdc-text-field {
+        width: 110px;
+        padding: 0 6px !important;
+        border-radius: 12px;
+    }
+
+    .mdc-text-field--filled {
+        background-color: rgba(90, 94, 109, 0.6) !important;
+    }
+
+    .mdc-text-field--filled .mdc-text-field__input {
+        background-color: transparent !important;
+        text-align: center !important;
+        font-size: 24px;
+        padding-top: 6px;
+        padding-left: 12px;
+    }
+
+    .mdc-text-field--filled .mdc-floating-label {
+        transform: translateY(-20px) scale(0.75); /* Makes the label float and smaller */
+        transition: transform 0.2s ease-in-out; /* Smooth transition for floating */
+    }
+
+    .mdc-text-field--filled .mdc-text-field__input:focus + .mdc-floating-label,
+    .mdc-text-field--filled .mdc-text-field__input:not(:placeholder-shown) + .mdc-floating-label {
+        transform: translateY(-20px) scale(0.75); /* Maintain floating position even on focus */
+    }
+
+    /* Optional: Adjust the label positioning when the field is empty */
+    .mdc-text-field--filled .mdc-floating-label {
+        top: -5px;
+        font-size: 19px; /* Ensure the font size is smaller */
+    }
+
+    .mat-mdc-form-field .mat-mdc-form-field-subscript-wrapper {
+        display: none;
+    }
+
+    .mat-mdc-icon-button {
+        position: relative; /* Ensures button can manage its z-index */
+        z-index: 10; /* Ensures button is above other elements */
+        margin-top: 24px; /* Moves the button down a bit */
+        padding: 0; /* Removes any padding */
+    }
+
+    .mat-mdc-icon-button mat-icon {
+        font-size: 24px; /* Adjust the icon size as needed */
+        position: relative; /* Adjust the position of the icon */
+        top: 0px; /* Fine-tune the vertical position of the icon */
+    }
 }
