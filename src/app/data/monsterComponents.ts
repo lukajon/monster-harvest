@@ -16,7 +16,7 @@ export interface MonsterComponent {
 }
 
 export const monsterComponents: MonsterComponents = {
-    Abberation: [
+    Aberration: [
         { dc: 5, creatureComponent: ['antenna', 'eye<sup>E+</sup>', 'flesh<sup>E</sup>', 'phial of blood<sup>E+</sup>'] },
         { dc: 10, creatureComponent: ['bone<sup>E+</sup>', 'egg<sup>E</sup>', 'fat<sup>E+</sup>', 'pouch of claws', 'pouch of teeth'] },
         { dc: 15, creatureComponent: ['heart<sup>E</sup>', 'phial of mucus', 'liver<sup>E</sup>', 'stinger', 'tentacle'] },
@@ -54,6 +54,13 @@ export const monsterComponents: MonsterComponents = {
         { dc: 10, creatureComponent: ['bone<sup>E+</sup>'] },
         { dc: 15, creatureComponent: ['volatile mote of air', 'volatile mote of earth', 'volatile mote of fire', 'volatile mote of water'] },
         { dc: 25, creatureComponent: ['core of air', 'core of earth', 'core of fire', 'core of water'] },
+    ],
+    Fey: [
+        { dc: 5, creatureComponent: ['antenna<sup>E+</sup>', 'eye<sup>E+</sup>', 'flesh<sup>E</sup>', 'phial of blood<sup>E+</sup>'] },
+        { dc: 10, creatureComponent: ['antler', 'beak', 'bone<sup>E+</sup>', 'egg<sup>E</sup>', 'horn', 'pouch of claws', 'pouch of teeth', 'talon', 'tusk'] },
+        { dc: 15, creatureComponent: ['heart<sup>E+</sup>', 'fat<sup>E+</sup>', 'liver<sup>E+</sup>', 'poison gland', 'pouch of feathers', 'pouch of scales', 'tentacle', 'tongue'] },
+        { dc: 20, creatureComponent: ['brain<sup>E</sup>', 'skin', 'pelt'] },
+        { dc: 25, creatureComponent: ['psyche'] },
     ],
     Fiend: [
         { dc: 5, creatureComponent: ['eye<sup>E+</sup>', 'flesh<sup>E</sup>', 'phial of blood<sup>E+</sup>', 'pouch of dust<sup>E+</sup>'] },

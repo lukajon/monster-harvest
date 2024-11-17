@@ -20,17 +20,11 @@
         </ng-container>
     </div>
 
-    <div *ngIf="showInfoAlert" class="alert alert-info mt-2" role="alert">
-        <button type="button" class="btn-close float-end" aria-label="Close" (click)="closeCheckInfo()"></button>
-        <strong>Harvesting check</strong> = Assessment check result + Carving check result + helper bonus (if applicable)<br>
-        <br>
-        <strong>Assessement check</strong> = <strong>1d20</strong> + <strong>Intelligence</strong> modifier + <strong>{{ selectedType ? creatureTypesAndSkills[this.selectedType].harvestSkill : 'skill proficiency' }}</strong> bonus (if proficient)<br>
-        <strong>Carving check</strong> = <strong>1d20</strong> + <strong>Dexterity</strong> modifier* + <strong>{{ selectedType ? creatureTypesAndSkills[this.selectedType].harvestSkill : 'skill proficiency' }}</strong> bonus (if proficient)<br>
-        *or Spellcasting ability modifier if it can be ritually carved.<br>
-        <br>
-        <strong>Helpers.</strong> If proficient in <strong>{{ selectedType ? creatureTypesAndSkills[this.selectedType].harvestSkill : 'skill proficiency' }}</strong>, add the proficiency bonus to the result,
-        if not proficient, add half the proficiency bonus (rounded down).
-    </div>
+    <app-harvest-info
+        *ngIf="showInfoAlert"
+        [selectedType]="selectedType"
+        (closeAlert)="showInfoAlert = false">
+    </app-harvest-info>
 
     <div class="flex justify-center items-center">
         <div class="flex space-x-20 items-center pt-2 pb-2 pl-6 pr-6 rounded-full infopill">
@@ -176,5 +170,9 @@
                 </mat-row>
             </mat-table>
         </div>
+    </div>
+
+    <div class="text-sm">
+        Legend: E = edible, but not used to craft items; E+ = both edible and used in crafting
     </div>
 </div>

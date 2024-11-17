@@ -1,0 +1,117 @@
+<div class="alert alert-info mt-2" role="alert">
+    <button type="button" class="btn-close float-end" aria-label="Close" (click)="close()"></button>
+    <div class="card p-3 mb-3 bg-orange-100">
+        <strong class="mb-2 d-block">Harvesting Check</strong>
+        <span>A <strong>single creature</strong> can choose to make <strong>both checks</strong>, assessment and carving; if it does so, it makes these checks with <strong>disadvantage</strong>.</span>
+        <table class="table table-borderless table-borderless-parchment mb-0">
+            <tbody>
+            <tr>
+                <td class="text-center">
+                    <span class="badge bg-primary">Assessment check result</span>
+                </td>
+                <td class="text-center text-2xl">+</td>
+                <td class="text-center">
+                    <span class="badge bg-danger">Carving check result</span>
+                </td>
+                <td class="text-center text-2xl">+</td>
+                <td class="text-center">
+                    <span class="badge bg-success">Helper bonus</span>
+                    <br><small>(if applicable)</small>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div class="card p-3 mb-3 bg-blue-100">
+            <strong class="mb-2 d-block">Assessment Check</strong>
+            <table class="table table-borderless table-borderless-blue mb-0">
+                <tbody>
+                <tr>
+                    <td class="text-center">
+                        <span class="badge bg-primary">1d20</span>
+                    </td>
+                    <td class="text-center text-2xl">+</td>
+                    <td class="text-center">
+                        <span class="badge bg-secondary">Intelligence modifier</span>
+                    </td>
+                    <td class="text-center text-2xl">+</td>
+                    <td class="text-center">
+                        <span class="badge"
+                              [ngClass]="harvestSkillColors[creatureTypesAndSkills[selectedType].harvestSkill]">
+                            proficiency bonus
+                        </span>
+                        <br>if <strong>proficient</strong> in<br>
+                        <span class="badge"
+                              [ngClass]="harvestSkillColors[creatureTypesAndSkills[selectedType].harvestSkill]">
+                            {{ selectedType ? creatureTypesAndSkills[selectedType].harvestSkill : 'related skill' }}
+                        </span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card p-3 mb-3 bg-rose-100">
+            <strong class="mb-2 d-block">Carving Check</strong>
+            <table class="table table-borderless table-borderless-red mb-0">
+                <tbody>
+                <tr>
+                    <td class="text-center">
+                        <span class="badge bg-primary">1d20</span>
+                    </td>
+                    <td class="text-center text-2xl">+</td>
+                    <td class="text-center">
+                        <span class="badge bg-rose-900">{{ selectedType && creatureTypesAndSkills[selectedType].ritual ? 'Dexterity modifier' : 'related skill' }}</span>
+                        <span *ngIf="selectedType && creatureTypesAndSkills[selectedType].ritual">
+                            <br><strong>OR</strong><br>
+                            <div class="badge bg-teal-500">Spellcasting ability modifier</div>
+                        </span>
+                    </td>
+                    <td class="text-center text-2xl">+</td>
+                    <td class="text-center">
+                    <span class="badge"
+                          [ngClass]="harvestSkillColors[creatureTypesAndSkills[selectedType].harvestSkill]">
+                        proficiency bonus
+                    </span>
+                        <br>if <strong>proficient</strong> in<br>
+                        <span class="badge"
+                              [ngClass]="harvestSkillColors[creatureTypesAndSkills[selectedType].harvestSkill]">
+                        {{ selectedType ? creatureTypesAndSkills[selectedType].harvestSkill : 'related skill' }}
+                    </span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card p-3 mb-3 bg-green-100">
+            <strong class="mb-2 d-block">Helpers</strong>
+            <table class="table table-borderless table-borderless-green mb-0">
+                <tbody>
+                <tr>
+                    <td class="text-center">If <strong>proficient</strong> in</td>
+                    <td class="text-center" rowspan="2">
+                    <span class="badge"
+                          [ngClass]="harvestSkillColors[creatureTypesAndSkills[selectedType].harvestSkill]">
+                        {{ selectedType ? creatureTypesAndSkills[selectedType].harvestSkill : 'related skill' }}
+                    </span>
+                    </td>
+                    <td class="text-center" rowspan="2">
+                        add
+                    </td>
+                    <td class="text-center">
+                        <span class="badge bg-primary">proficiency bonus</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="text-center">If <strong>not proficient</strong> in</td>
+                    <td class="text-center">
+                        <span class="badge bg-secondary">halved proficiency bonus</span><br>
+                        <small>(rounded down)</small>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

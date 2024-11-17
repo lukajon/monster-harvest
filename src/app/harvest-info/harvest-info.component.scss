@@ -1,0 +1,31 @@
+.card {
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    // background-color: #f0e4d7;
+}
+
+.table-borderless td {
+    padding: 0.5rem;
+    vertical-align: middle;
+}
+
+.table-borderless-parchment td {
+    background-color: rgb(255 237 213);
+}
+
+.table-borderless-blue td {
+    background-color: #DBEAFE;
+}
+
+.table-borderless-red td {
+    background-color: #FFE4E6;
+}
+
+.table-borderless-green td {
+    background-color: rgb(220 252 231);;
+}
+
+.badge {
+    font-size: 1rem; /* Slightly larger for readability */
+    padding: 0.6rem;
+}
