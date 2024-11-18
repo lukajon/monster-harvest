@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {MonsterComponent, MonsterComponents, monsterComponents} from '../data/monsterComponents';
 import {

@@ -121,7 +121,7 @@
                 </ng-container>
 
                 <mat-header-row *matHeaderRowDef="displayedColumnsHarvestList"></mat-header-row>
-                <mat-row *matRowDef="let row; columns: displayedColumnsHarvestList" cdkDrag [cdkDragData]="row">
+                <mat-row *matRowDef="let row; columns: displayedColumnsHarvestList" cdkDrag draggable='true' [cdkDragData]="row">
                 </mat-row>
             </mat-table>
         </div>
@@ -164,6 +164,7 @@
                 <mat-header-row *matHeaderRowDef="dmMode ? displayedColumns.concat(['actions']) : displayedColumns"></mat-header-row>
                 <mat-row *matRowDef="let row; columns: dmMode ? displayedColumns.concat(['actions']) : displayedColumns;"
                          cdkDrag
+                         draggable='true'
                          [cdkDragData]="row"
                          [class.dm-mode]="dmMode"
                          [class.move-mode]="!dmMode">
