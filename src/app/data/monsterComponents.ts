@@ -105,7 +105,7 @@ export const monsterComponents: MonsterComponents = {
         { dc: 15, creatureComponent: ['ethereal ichor<sup>E+</sup>', 'undying flesh<sup>E+</sup>'] },
         { dc: 20, creatureComponent: ['undying heart<sup>E+</sup>'] },
     ],
-    Fey (Suneater Owlbear): [
+    'Fey (Suneater Owlbear)': [
         { dc: 5, creatureComponent: ['eye<sup>E+</sup>', 'Suneater flesh<sup>E</sup> (Special)', 'phial of blood<sup>E+</sup>'] },
         { dc: 10, creatureComponent: ['pouch of Suneater feathers (Special)', 'bone<sup>E+</sup>', 'pouch of claws'] },
         { dc: 15, creatureComponent: ['Suneater beak (Special)', 'Suneater featherfrond (Special)', 'heart<sup>E+</sup>', 'fat<sup>E+</sup>', 'liver<sup>E+</sup>', 'tongue'] },
